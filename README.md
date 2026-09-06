@@ -213,8 +213,9 @@ its word for it.
 
 Stage 3 fetches each candidate image, runs the **same** detector and encoder
 used on the query photo, and computes cosine similarity between the embeddings.
-Only candidates at or above **0.363** — SFace's published same-identity
-threshold — are eligible. The score written into the record is computed here, by
+Only candidates at or above **0.45** are eligible. SFace publishes 0.363 as its
+same-identity threshold, but that proved too permissive in practice (see
+limitations), so the default is raised. The score written into the record is computed here, by
 this pipeline, not supplied by the search provider.
 
 If no candidate clears the threshold, the run reports no match and anchors
@@ -244,7 +245,7 @@ assumed. Two real runs:
 | Subject | Result |
 | --- | --- |
 | Heavily-indexed public figure | 8 matches at 0.94-0.98, no false positives, correct identification |
-| Private individual, one indexed photo | correct match at 0.94, but a look-alike cleared the 0.363 threshold by 0.0009 |
+| Private individual, one indexed photo | correct match at 0.94, but a look-alike scored 0.3639 - clearing SFace's published 0.363 threshold by 0.0009 |
 
 With thousands of crawled copies the true matches dominate and scores separate
 cleanly. With a single crawled photo the candidate pool fills with look-alikes
@@ -258,9 +259,12 @@ scales with indexed footprint - it is not uniform across people.
   relatives, and strong lookalikes.
 - Published accuracy is not uniform across demographic groups. A single cosine
   threshold does not correct for that.
-- The 0.363 threshold trades precision against recall at a fixed point. It is
-  tunable via `FACEBLOCK_FACE_THRESHOLD`, and no single value is right for
-  every deployment.
+- The default threshold is **0.45**, raised from SFace's published 0.363 on the
+  evidence above: genuine matches clustered at 0.94+ while the worst false
+  positive reached 0.3639, leaving a wide empty band between them. This buys
+  precision at the cost of recall - a genuine match seen at an awkward angle
+  may now be rejected. Tune it with `FACEBLOCK_FACE_THRESHOLD`; no single value
+  is right for every deployment.
 
 **Reverse image search**
 - Vision only searches what Google has crawled. Private accounts, follower-only

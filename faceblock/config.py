@@ -18,9 +18,17 @@ RECORD_DIR = Path(
     os.getenv("FACEBLOCK_RECORD_DIR", str(PROJECT_ROOT / "data" / "records"))
 )
 
-# SFace's published same-identity cosine threshold (OpenCV Zoo). Pairs scoring
-# at or above this are treated as the same person; below, as a different one.
-FACE_MATCH_THRESHOLD = float(os.getenv("FACEBLOCK_FACE_THRESHOLD", "0.363"))
+# Cosine threshold above which two faces are treated as the same person.
+#
+# SFace's published same-identity threshold is 0.363, and that is too permissive
+# here. Measured on a real run: a genuine match scored 0.94 while an unrelated
+# look-alike scored 0.3639 - clearing the published threshold by 0.0009. The
+# candidate pool for any one photo is drawn from visually similar images, so
+# near-threshold scores are exactly where the false positives live.
+#
+# 0.45 sits in the empty band between those two populations: every genuine match
+# observed scored 0.94 or above, and the highest false positive scored 0.3639.
+FACE_MATCH_THRESHOLD = float(os.getenv("FACEBLOCK_FACE_THRESHOLD", "0.45"))
 
 # Cap on candidate pages we download and re-rank, to stay polite and bounded.
 MAX_CANDIDATES = int(os.getenv("FACEBLOCK_MAX_CANDIDATES", "25"))
