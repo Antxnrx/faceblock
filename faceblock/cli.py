@@ -17,65 +17,71 @@ from .faces import detect_faces, load_image, primary_face
 from .match import best_verified, rank_candidates
 from .search import reverse_image_search
 from .sentinel import IMPERSONATION, sweep
+from .term import bad, bold, dim, head, key, link, ok, warn
 
 
-def _step(number: int, title: str) -> None:
-    print(f"\n[{number}/5] {title}")
-    print("-" * (len(title) + 6))
+def _step(number: int, title: str, total: int = 5) -> None:
+    print(f"\n{head(f'[{number}/{total}] {title}')}")
+    print(dim("-" * (len(title) + 6)))
 
 
 def cmd_run(args: argparse.Namespace) -> int:
     image_path = Path(args.image)
     if not image_path.exists():
-        print(f"error: no such image: {image_path}", file=sys.stderr)
+        print(f"{bad('error:')} no such image: {image_path}", file=sys.stderr)
         return 2
 
     _step(1, "Detect and encode face")
     face = primary_face(load_image(image_path))
     if face is None:
-        print("  no face detected - cannot continue")
+        print(f"  {bad('no face detected')} - cannot continue")
         return 1
-    print(f"  bbox={face.bbox}  detector_score={face.detector_score:.3f}")
-    print(f"  embedding: 128-d SFace, sha256={rec.sha256_embedding(face.embedding)[:32]}...")
+    print(f"  bbox={key(face.bbox)}  detector_score={key(f'{face.detector_score:.3f}')}")
+    print(f"  embedding: {key('128-d SFace')}, "
+          f"sha256={dim(rec.sha256_embedding(face.embedding)[:32] + '...')}")
 
     _step(2, f"Reverse image search ({SEARCH_PROVIDER})")
     search = reverse_image_search(image_path)
-    print(f"  best guess:  {search.best_guess or '-'}")
-    print(f"  candidates:  {len(search.candidates)} "
-          f"({len(search.social_candidates)} on social/profile domains)")
+    print(f"  best guess:  {key(search.best_guess or '-')}")
+    print(f"  candidates:  {key(len(search.candidates))} "
+          f"({key(len(search.social_candidates))} on social/profile domains)")
     if not search.candidates:
         print("\n  The index returned no matches for this photo. This is a real,")
         print("  unmodified result - the pipeline does not fabricate matches.")
         return 1
     for c in search.social_candidates[:8]:
-        print(f"    [{c.platform}] {c.page_url or c.image_url}")
+        print(f"    [{key(c.platform)}] {dim(c.page_url or c.image_url)}")
 
     _step(3, "Verify candidates by re-encoding their faces")
     ranked = rank_candidates(search.candidates, face.embedding, limit=args.max_candidates)
     scored = [r for r in ranked if r.faces_found]
-    print(f"  fetched {len(ranked)} candidates, {len(scored)} contained a detectable face")
+    print(f"  fetched {key(len(ranked))} candidates, "
+          f"{key(len(scored))} contained a detectable face")
     for r in ranked[:8]:
         if r.error:
             continue
-        flag = "MATCH" if r.verified else "  -  "
-        print(f"    {flag} sim={r.similarity:+.4f}  {r.candidate.page_url or r.candidate.image_url}")
-    print(f"  threshold for same identity: {FACE_MATCH_THRESHOLD}")
+        flag = ok("MATCH") if r.verified else dim("  -  ")
+        score = key(f"{r.similarity:+.4f}") if r.verified else dim(f"{r.similarity:+.4f}")
+        url = r.candidate.page_url or r.candidate.image_url
+        print(f"    {flag} sim={score}  {url if r.verified else dim(url)}")
+    print(f"  threshold for same identity: {key(FACE_MATCH_THRESHOLD)}")
 
     match = best_verified(ranked)
     if match is None:
         top = ranked[0].similarity if ranked else -1
-        print(f"\n  No candidate cleared the threshold (best was {top:+.4f}).")
-        print("  Reporting no match rather than anchoring an unverified claim.")
+        print(f"\n  {warn('No candidate cleared the threshold')} (best was {top:+.4f}).")
+        print(dim("  Reporting no match rather than anchoring an unverified claim."))
         return 1
-    print(f"\n  selected: {match.candidate.page_url or match.candidate.image_url}")
-    print(f"  platform: {match.candidate.platform}  confidence: {match.similarity:.4f}")
+    print(f"\n  selected: {link(match.candidate.page_url or match.candidate.image_url)}")
+    print(f"  platform: {key(match.candidate.platform)}  "
+          f"confidence: {bold(key(f'{match.similarity:.4f}'))}")
 
     _step(4, "Build off-chain record and digest")
     payload = rec.build_record(image_path, face, match, search.best_guess)
     digest = rec.compute_digest(payload)
     path = rec.save(payload, digest)
-    print(f"  record: {path}")
-    print(f"  sha256: {digest}")
+    print(f"  record: {key(path)}")
+    print(f"  sha256: {key(digest)}")
 
     _step(5, "Anchor digest on chain")
     if args.no_anchor:
@@ -83,13 +89,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 0
     receipt = chain.anchor(digest, args.network)
     rec.attach_anchor(path, receipt)
-    print(f"  network:  {receipt['network']} (chain id {receipt['chain_id']})")
-    print(f"  contract: {receipt['contract']}")
-    print(f"  block:    {receipt['block_number']}")
+    print(f"  network:  {key(receipt['network'])} (chain id {receipt['chain_id']})")
+    print(f"  contract: {key(receipt['contract'])}")
+    print(f"  block:    {key(receipt['block_number'])}")
     if receipt["explorer_url"]:
-        print(f"  explorer: {receipt['explorer_url']}")
-    print("\nDone. Verify independently with:")
-    print(f"  python -m faceblock.cli verify {path}")
+        print(f"  explorer: {link(receipt['explorer_url'])}")
+    print(f"\n{ok('Done.')} Verify independently with:")
+    print(f"  {bold(f'python -m faceblock.cli verify {path}')}")
     return 0
 
 
@@ -102,18 +108,19 @@ def cmd_enroll(args: argparse.Namespace) -> int:
             print(f"  no face found in {photo} - skipping", file=sys.stderr)
             continue
         embeddings.append(face.embedding)
-        print(f"  encoded {photo}")
+        print(f"  {ok('encoded')} {key(photo)}")
 
     if not embeddings:
         print("error: no usable reference photos", file=sys.stderr)
         return 1
 
     person = ident.enroll(args.name, embeddings, args.handle)
-    print(f"\nEnrolled {person.name!r} as {person.slug!r}")
-    print(f"  reference photos: {len(person.embeddings)}")
-    print(f"  handles owned:    {', '.join(h.as_text() for h in person.handles) or 'none'}")
-    print(f"  stored at:        {person.path}")
-    print("\nReference embeddings stay on this machine and never go on chain.")
+    print(f"\n{ok('Enrolled')} {bold(person.name)} as {key(person.slug)}")
+    print(f"  reference photos: {key(len(person.embeddings))}")
+    print(f"  handles owned:    "
+          f"{key(', '.join(h.as_text() for h in person.handles) or 'none')}")
+    print(f"  stored at:        {dim(person.path)}")
+    print(dim("\nReference embeddings stay on this machine and never go on chain."))
     return 0
 
 
@@ -122,23 +129,25 @@ def cmd_sentinel(args: argparse.Namespace) -> int:
     person = ident.load(args.identity)
     image_path = Path(args.photo)
     if not image_path.exists():
-        print(f"error: no such image: {image_path}", file=sys.stderr)
+        print(f"{bad('error:')} no such image: {image_path}", file=sys.stderr)
         return 2
 
-    print(f"Sweeping for {person.name} ({len(person.handles)} owned handles)")
+    print(f"{head('Sweeping for ' + person.name)} "
+          f"({key(len(person.handles))} owned handles)")
     result = sweep(person, image_path, limit=args.max_candidates)
 
-    print(f"\n  candidates from reverse image search: {len(result.search.candidates)}")
-    print(f"  confirmed as this face:               {len(result.sightings)}")
-    print(f"    on pages they control:              {len(result.owned)}")
-    print(f"    on pages they do NOT control:       {len(result.impersonations)}")
+    print(f"\n  candidates from reverse image search: {key(len(result.search.candidates))}")
+    print(f"  confirmed as this face:               {key(len(result.sightings))}")
+    print(f"    on pages they control:              {ok(len(result.owned))}")
+    print(f"    on pages they do NOT control:       "
+          f"{bad(len(result.impersonations)) if result.impersonations else ok(0)}")
 
     for sighting in result.owned:
-        print(f"\n  [OK] {sighting.url}")
-        print(f"       owned handle, similarity {sighting.identity_similarity:.4f}")
+        print(f"\n  [{ok('OK')}] {dim(sighting.url)}")
+        print(dim(f"       owned handle, similarity {sighting.identity_similarity:.4f}"))
 
     if not result.impersonations:
-        print("\nNo unrecognised sightings. Nothing to notarise.")
+        print(f"\n{ok('No unrecognised sightings.')} Nothing to notarise.")
         return 0
 
     face = primary_face(load_image(image_path))
@@ -149,9 +158,10 @@ def cmd_sentinel(args: argparse.Namespace) -> int:
 
     written: list[Path] = []
     for sighting in targets:
-        print(f"\n  [{sighting.severity.upper()}] {sighting.url}")
-        print(f"       platform: {sighting.ranked.candidate.platform or 'unrecognised'}"
-              f"  similarity: {sighting.identity_similarity:.4f}")
+        tag = (bad if sighting.severity == "high" else warn)(sighting.severity.upper())
+        print(f"\n  [{tag}] {link(sighting.url)}")
+        print(f"       platform: {key(sighting.ranked.candidate.platform or 'unrecognised')}"
+              f"  similarity: {bold(key(f'{sighting.identity_similarity:.4f}'))}")
 
         payload = rec.build_sighting_record(
             image_path, face, sighting.ranked, person.name,
@@ -159,7 +169,7 @@ def cmd_sentinel(args: argparse.Namespace) -> int:
         )
         digest = rec.compute_digest(payload)
         record_path = rec.save(payload, digest)
-        print(f"       record: {record_path.name}  digest: {digest[:24]}...")
+        print(f"       record: {key(record_path.name)}  digest: {dim(digest[:24] + '...')}")
 
         meta = {
             "subject": person.name, "url": sighting.url,
@@ -171,18 +181,19 @@ def cmd_sentinel(args: argparse.Namespace) -> int:
             receipt = chain.anchor(digest, args.network)
             rec.attach_anchor(record_path, receipt)
             meta |= {"contract": receipt["contract"], "tx_hash": receipt["tx_hash"]}
-            print(f"       anchored in block {receipt['block_number']}")
+            print(f"       {ok('anchored')} in block {key(receipt['block_number'])}")
             if receipt["explorer_url"]:
-                print(f"       {receipt['explorer_url']}")
+                print(f"       {link(receipt['explorer_url'])}")
 
         cert = evidence.save(
             evidence.build(payload, digest, meta, args.network), digest
         )
         written.append(cert)
-        print(f"       certificate: {cert}")
+        print(f"       certificate: {key(cert)}")
 
-    print(f"\n{len(written)} evidence certificate(s) written. Open one in a browser -")
-    print("it re-checks its own digest and the chain with no server involved.")
+    print(f"\n{ok(bold(f'{len(written)} evidence certificate(s) written.'))} "
+          f"Open one in a browser -")
+    print(dim("it re-checks its own digest and the chain with no server involved."))
     return 0
 
 
@@ -210,26 +221,28 @@ def cmd_verify(args: argparse.Namespace) -> int:
     stored = payload["digest"]
     recomputed = rec.compute_digest(payload["record"])
 
-    print("Local integrity")
-    print(f"  stored digest:     {stored}")
-    print(f"  recomputed digest: {recomputed}")
+    print(head("Local integrity"))
+    print(f"  stored digest:     {key(stored)}")
+    print(f"  recomputed digest: "
+          f"{key(recomputed) if stored == recomputed else bad(recomputed)}")
     if stored != recomputed:
-        print("  FAIL - the record has been modified since it was digested.")
+        print(f"  {bad('FAIL')} - the record has been modified since it was digested.")
+        print(f"\n{bad(bold('TAMPERED: this record no longer matches its digest.'))}")
         return 1
-    print("  OK - record matches its digest.")
+    print(f"  {ok('OK')} - record matches its digest.")
 
-    print("\nOn-chain anchor")
+    print(f"\n{head('On-chain anchor')}")
     found = chain.lookup(stored, args.network)
-    if found is None:
-        print(f"  FAIL - digest is not anchored on {chain_preset(args.network).name}.")
-        return 1
     preset = chain_preset(args.network)
-    print(f"  network:   {preset.name}")
-    print(f"  contract:  {found['contract']}")
-    print(f"  submitter: {found['submitter']}")
-    print(f"  anchored:  block timestamp {found['timestamp']}")
-    print("  OK - digest is anchored on chain and matches the local record.")
-    print("\nVERIFIED: this record is byte-identical to the one anchored on chain.")
+    if found is None:
+        print(f"  {bad('FAIL')} - digest is not anchored on {preset.name}.")
+        return 1
+    print(f"  network:   {key(preset.name)}")
+    print(f"  contract:  {key(found['contract'])}")
+    print(f"  submitter: {key(found['submitter'])}")
+    print(f"  anchored:  block timestamp {key(found['timestamp'])}")
+    print(f"  {ok('OK')} - digest is anchored on chain and matches the local record.")
+    print(f"\n{ok(bold('VERIFIED: this record is byte-identical to the one anchored on chain.'))}")
     return 0
 
 
@@ -245,18 +258,18 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     from .config import contract_address, google_api_key, serpapi_key
 
     key_probe = serpapi_key if SEARCH_PROVIDER == "serpapi" else google_api_key
-    ok = True
+    healthy = True
     for label, probe in (
         (f"Search key ({SEARCH_PROVIDER})", lambda: f"set ({len(key_probe())} chars)"),
         ("Testnet account", lambda: chain.balance_report(args.network)),
         ("Contract address", contract_address),
     ):
         try:
-            print(f"  OK   {label}: {probe()}")
+            print(f"  {ok('OK')}   {label}: {key(probe())}")
         except Exception as exc:  # noqa: BLE001 - doctor reports, never raises
-            ok = False
-            print(f"  FAIL {label}: {exc}")
-    return 0 if ok else 1
+            healthy = False
+            print(f"  {bad('FAIL')} {label}: {exc}")
+    return 0 if healthy else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -315,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:
         return 130
     except Exception as exc:  # noqa: BLE001 - CLI surfaces errors, not tracebacks
-        print(f"\nerror: {exc}", file=sys.stderr)
+        print(f"\n{bad('error:')} {exc}", file=sys.stderr)
         return 1
 
 
