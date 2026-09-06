@@ -1,0 +1,77 @@
+{
+  "search_metadata": {"id": "695a32db8c24bd7f5a713fd7", "status": "Success"},
+  "search_parameters": {"engine": "google_lens", "url": "https://i.imgur.com/HBrB8p0.jpeg"},
+  "ai_overview": {"page_token": "00qnGXic-truncated"},
+  "visual_matches": [
+    {
+      "position": 1,
+      "title": "Ficheiro:Danny DeVito by Gage Skidmore.jpg",
+      "link": "https://pt.wikipedia.org/wiki/Ficheiro:Danny_DeVito_by_Gage_Skidmore.jpg",
+      "source": "Wikipedia",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRLgnjVtMg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Danny_DeVito_by_Gage_Skidmore.jpg/1009px-Danny_DeVito_by_Gage_Skidmore.jpg",
+      "image_width": 1200, "image_height": 1009
+    },
+    {
+      "position": 7,
+      "title": "Others have had luck with this here so I thought",
+      "link": "https://www.reddit.com/r/glasses/comments/mzhhin/others_have_had_luck_with_this_here/",
+      "source": "Reddit",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQdzkPRkV2",
+      "image": "https://preview.redd.it/sf67nyh9lnv61.png?width=1080"
+    },
+    {
+      "position": 8,
+      "title": "Se num futuro da franquia dos filmes adaptarem o conceito",
+      "link": "https://www.facebook.com/groups/404148061122111/posts/974159154120996/",
+      "source": "Facebook",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSi2pT7Uw",
+      "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=1141617857607561"
+    },
+    {
+      "position": 15,
+      "title": "Liana Satenstein | In honor of the book release of",
+      "link": "https://www.instagram.com/p/DABqND-una8/",
+      "source": "Instagram",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSa-1edFy",
+      "image": "https://lookaside.instagram.com/seo/google_widget/crawler/?media_id=3459231590653854348"
+    },
+    {
+      "position": 29,
+      "title": "Danny Devito says he would be up for taking on the role of",
+      "link": "https://x.com/GeeksGamersCom/status/1790810486239293505",
+      "source": "X",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKSiZpO",
+      "image": "https://pbs.twimg.com/media/GNo8pVBWYAAgwiu.jpg"
+    },
+    {
+      "position": 52,
+      "title": "Danny Devito | TikTok",
+      "link": "https://www.tiktok.com/discover/danny-devito",
+      "source": "TikTok",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv4o5CkIu8",
+      "image": "https://www.tiktok.com/api/img/?itemId=7424988665429921055"
+    },
+    {
+      "position": 53,
+      "title": "Danny Devito Earrings, Funny Gift - Etsy Canada",
+      "link": "https://www.etsy.com/ca/listing/1889868350/danny-devito-earrings-funny-gift",
+      "source": "Etsy",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXlQrKhr",
+      "image": "https://i.etsystatic.com/13437818/r/il/8e5932/2536448856/il_fullxfull.jpg"
+    },
+    {
+      "position": 59,
+      "title": "No image field at all - must be skipped, not crash",
+      "link": "https://example.com/no-image",
+      "source": "example.com"
+    }
+  ],
+  "related_content": [
+    {
+      "query": "Danny DeVito",
+      "link": "https://www.google.com/search?q=Danny+DeVito",
+      "thumbnail": "https://serpapi.com/searches/thumb.jpeg"
+    }
+  ]
+}
