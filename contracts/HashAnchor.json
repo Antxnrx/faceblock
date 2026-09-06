@@ -1,0 +1,115 @@
+{
+  "contractName": "HashAnchor",
+  "source": "contracts/HashAnchor.sol",
+  "compiler": {
+    "name": "solcjs",
+    "version": "0.8.26",
+    "optimizer": true
+  },
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AlreadyAnchored",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "NotAnchored",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "submitter",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        }
+      ],
+      "name": "Anchored",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "anchor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "get",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        },
+        {
+          "internalType": "address",
+          "name": "submitter",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isAnchored",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f80fd5b506102628061001c5f395ff3fe608060405234801561000f575f80fd5b506004361061003f575f3560e01c80634f0b5801146100435780638eaa6ac014610083578063eecdf927146100be575b5f80fd5b61006e610051366004610215565b5f9081526020819052604090205467ffffffffffffffff16151590565b60405190151581526020015b60405180910390f35b610096610091366004610215565b6100d3565b6040805167ffffffffffffffff90931683526001600160a01b0390911660208301520161007a565b6100d16100cc366004610215565b61014b565b005b5f8181526020818152604080832081518083019092525467ffffffffffffffff8116808352600160401b9091046001600160a01b03169282019290925282918203610139576040516307b5496b60e51b8152600481018590526024015b60405180910390fd5b80516020909101519094909350915050565b5f8181526020819052604090205467ffffffffffffffff1615610184576040516330d2381360e01b815260048101829052602401610130565b60408051808201825267ffffffffffffffff428181168084523360208086018281525f8981528083528890209651875491516001600160a01b0316600160401b026001600160e01b03199092169616959095179490941790945593519384529284917f0733e5a0823eaea6686da77c223c685bd0c96ab61f1323c5ab21d5ecc786f53a910160405180910390a35050565b5f60208284031215610225575f80fd5b503591905056fea264697066735822122035b1319a9049fecf439982f62fd3eb0f93281c17b6d38346be7e54bcf5904a4364736f6c634300081a0033"
+}
