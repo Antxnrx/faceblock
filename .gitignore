@@ -1,0 +1,29 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Secrets - never commit
+.env
+
+# Solidity build output; the committed artifact is contracts/HashAnchor.json
+build/
+
+# Enrolled identities hold face embeddings - biometric data that must stay
+# on the machine that produced it.
+data/identities/
+
+# Match records and generated certificates name real people and real URLs.
+# The one curated example lives in docs/sample-certificate.html.
+data/records/*.json
+!data/records/.gitkeep
+data/evidence/
+
+# Sample photos are not redistributed: the personal one is private, and the
+# public-figure ones are copyrighted press images. Bring your own - see README.
+samples/*
+!samples/messi5.jpg
+!samples/.gitkeep
+
+# Tooling scratch
+.playwright-mcp/

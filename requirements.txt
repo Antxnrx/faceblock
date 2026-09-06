@@ -1,0 +1,9 @@
+# Core pipeline
+opencv-contrib-python==4.10.0.84   # YuNet face detection + SFace face embedding
+numpy>=1.26,<3
+Pillow>=10.0                       # robust decoding of downloaded candidate images
+requests>=2.31                     # Google Vision REST + candidate image fetch
+
+# Blockchain anchoring
+web3>=7.0,<8                       # Polygon Amoy / any EVM testnet
+python-dotenv>=1.0                 # local .env config
